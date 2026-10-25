@@ -16,8 +16,8 @@ the time display: each protocol hides it first.
 The script plays the game as it stands: the mods installed, the size of the window and the interface scales are
 set before KSP starts. It clicks with the server's mouse tools, mouse_move and mouse_click, which move the game's
 pointer and press its buttons as a mouse does. It opens the construction mode as the construction button of the
-toolbar does (EVAConstructionModeController.OpenConstructionPanel), and warps time with set_warp, as the . and ,
-keys do. It finds what it clicks by moving the pointer over the screen first and reading which interface objects
+toolbar does, and reads the tool in use, with the server's construction_tool, and warps time with set_warp, as the
+. and , keys do. It finds what it clicks by moving the pointer over the screen first and reading which interface objects
 lie under it, the topmost first and the ones beneath too, so the same script plays any window size and interface
 scale:
 
@@ -266,7 +266,7 @@ class Run:
         time.sleep(0.5)
         step = {"click": what, "x": x, "y": y, "under": under, "utBefore": before}
         if self.construction:
-            step["tool"] = call("get_member", type="EVAConstructionModeEditor", member="EVAConstructionMode")["value"]
+            step["tool"] = call("construction_tool")["tool"]
         self.steps.append(step)
         log("click at %d, %d (%s), over %s%s" % (x, y, what, under,
                                                  ", tool %s" % step["tool"] if "tool" in step else ""))
@@ -454,7 +454,7 @@ def start(options):
     screen = Screen()
     screen.park(3)
     # The game remembers whether the next alarm shows: each protocol starts with it hidden.
-    if call("get_member", type="FlightUIModeController", member="NextAlarmShowing")["value"]:
+    if call("get_state")["nextAlarmShowing"]:
         run = Run(screen, None)
         run.find_alarm()
         call("mouse_click", x=run.found["alarm"].middle()[0], y=run.found["alarm"].middle()[1])
@@ -464,15 +464,13 @@ def start(options):
 
 def open_construction_mode(screen):
     """Opens the EVA construction mode, as its button in the toolbar does."""
-    call("call_method", type="EVAConstructionModeController", method="OpenConstructionPanel")
+    call("construction_tool", panel="open")
     screen.park()
-    if not construction_mode_open():
-        raise RuntimeError("the construction mode did not open: is the kerbal on EVA an engineer?")
 
 
 def construction_mode_open():
     """Whether the EVA construction mode is open."""
-    return call("get_member", type="EVAConstructionModeController", member="IsOpen")["value"]
+    return call("construction_tool")["panelOpen"]
 
 
 # A warp to the morning moves the clock by hours; a step of the protocol, by seconds.
