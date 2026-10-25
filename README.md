@@ -132,15 +132,25 @@ construction mode moves down and back up with it.
 
 ## Checked: other screen sizes and interface scales
 
-The three protocols are played again at 1280 × 720 with the interface at 150 %, then with the time display alone
-at 150 %, and at 1920 × 1080 with the interface at 100 % and 150 %. Each time, the defects show on stock, the
-time display at 150 % also taking the clicks on the Move and Rotate tools; with this mod, every tool responds.
+The three protocols are played again at 1280 × 720 with the interface at 80 % and 150 %, then with the time
+display alone at 80 % and 150 %, and at 1920 × 1080 with the interface at 100 % and 150 %. On stock, the defects
+show in each, the time display at 150 % also taking the clicks on the Move and Rotate tools; with this mod, every
+tool responds.
 
 **→ Full chapter: [Checking other screen sizes and interface scales](docs/checking-interface-scales.md)**
 
+## Checked: the tracking station
+
+In the tracking station, the warp-to-morning button is always shown, without a drawer, and this mod puts nothing
+there. It is clicked with nothing selected, then with the kerbal selected. On stock as with this mod, it is
+greyed until a vessel is selected, then warps to the morning.
+
+**→ Full chapter: [Checking the tracking station](docs/checking-station.md)**
+
 ## Testing it automatically
 
-[run-tools.py](diag/automation/run-tools.py) plays the three protocols above through
+[run-tools.py](diag/automation/run-tools.py) plays the four protocols above, the construction tools, the drawer,
+the next alarm and the tracking station, through
 [KSP-Util-MCPServer](https://github.com/lhervier/KSP-Util-MCPServer), and checks their outcome. Python 3 only,
 nothing to install: start KSP with KSP-Util-MCPServer, copy [construction-toolbar.sfs](diag/construction-toolbar.sfs)
 into a sandbox game, then run:
@@ -168,21 +178,14 @@ PASS alarm   (fix) the next alarm showing, the click on the top of the Place too
 PASS alarm   (fix) the next alarm showing, the header of the first container of the list shows under the pointer
 PASS alarm   the next alarm hidden again, the click on the middle of the Move tool selects it
 PASS alarm   (fix) the next alarm hidden again, the click on the top of the Place tool selects it
-14 of 14 checks passed
+PASS station the kerbal selected, the click on the tracking station's warp-to-morning button warps to the morning
+15 of 15 checks passed
 ```
 
 ## Work in progress
 
 What a player would see if this mod broke something, and how to try it by hand, with the mod and without:
 
-- **The interface scaled down.** Only scales of 100 % and 150 % were played. If the mod broke below, the drawer
-  would not open from the time display, or the construction mode would stay under the time display, or come
-  down too far, with the next alarm shown. With the interface, then the time display alone, at 80 %: in
-  construction mode, click the top of the Place tool; open the drawer from the date and click the sunrise
-  button; show the next alarm, and look at the first row of the list and at the tools.
-- **The tracking station.** The mod changes every time display whose drawer slides out on hover, wherever it
-  is. If it broke one there, its drawer would not open. In the tracking station, rest the pointer on the date,
-  then on the sunrise button, and click it.
 - **Other mods that change the top left of the screen.** A mod that moves or rescales the time display, or the
   construction mode, could change what lies under the tools. With such a mod installed, play the three protocols
   by hand.

@@ -1,5 +1,6 @@
 """Plays the protocols of Construction Toolbar Fix: the tools of the EVA construction mode, the warp-to-morning
-drawer of the time display, and the construction mode with the next alarm showing.
+drawer of the time display, the construction mode with the next alarm showing, and the warp-to-morning button of
+the tracking station.
 
 It drives KSP through KSP-Util-MCPServer, a mod that answers HTTP requests on 127.0.0.1, and needs nothing but
 Python 3: no AI, no package to install. Start KSP with KSP-Util-MCPServer installed, copy construction-toolbar.sfs
@@ -27,7 +28,9 @@ scale:
 - the alarm clock button, left of the time display: the rectangle over which it is the topmost object;
 - the date of the time display and the sunrise button of its drawer: measured while time warps at 5x, which holds
   the drawer open; time is then set back to normal and the drawer left to close. The date is then put back on
-  the first row where it shows, the drawer closed.
+  the first row where it shows, the drawer closed;
+- in the tracking station, its warp-to-morning button, always shown at the top: the rectangle over which it is the
+  topmost object; the kerbal's row of the list, as the server's read_tracking_station gives it.
 
 Between two steps, the pointer rests in the middle of the screen, and the game settles for two seconds: long
 enough for the drawer to close.
@@ -45,6 +48,11 @@ The alarm (--protocol alarm), in construction mode: click the alarm clock button
 slides the time display down; find the tools and the list again; click the middle of the Move tool, then the top
 of the Place tool; rest the pointer on the middle of the first header of the list; click the alarm clock button
 again, which hides the next alarm; click the middle of the Move tool, then the top of the Place tool.
+
+The tracking station (--protocol station), entered from the flight as its scene: click the
+warp-to-morning button, no vessel selected; click the kerbal's row, which selects it; click the button again; let
+the warp end. When the capsule broke up as the save loaded, the station shows the kerbal's row lit with nothing
+selected, and a click on it does nothing: the save is then loaded again, four times at most.
 
 A screenshot is taken at the start and after every step, as a PNG the size of the window; while the pointer rests
 on a point, the pointer is drawn on it where it was, screenshots leaving it out. With Pillow installed, each is
@@ -65,6 +73,7 @@ when all pass, 1 otherwise. Without the mod, the checks marked (fix) fail: they 
 - alarm: the next alarm showing, the top of the Place tool takes the click and selects it, the Move tool clicked
   before it, and the first header of the list shows under the pointer (fix); the next alarm hidden
   again, the middle of the Move tool selects it, and the top of the Place tool then selects it (fix).
+- station: the kerbal selected, the click on the warp-to-morning button warps to the morning.
 
 KSP is left running at the end.
 """
@@ -82,6 +91,11 @@ TOOLS = {"place": "ToolPlace", "move": "ToolMove", "rotate": "ToolRotate"}
 DATE = "TextTime"
 SUNRISE = "WarpToSunriseButton"
 ALARM = "alarmButton"
+# The tracking station's warp-to-morning button, always shown, and the vessel whose row is clicked: the kerbal on EVA,
+# the active vessel (the capsule may not survive the load: it sometimes breaks up on the launch pad, with or without
+# this mod).
+STATION_SUNRISE = "WarpToMorning"
+STATION_VESSEL = "Bill Kerman"
 # The header of each container of the construction mode's list of parts, the kerbal's inventory first.
 PART_HEADER = "Header Image"
 
@@ -589,7 +603,58 @@ def alarm(options, out):
     return run
 
 
-PROTOCOLS = {"tools": tools, "drawer": drawer, "alarm": alarm}
+def enter_station(options):
+    """Loads the save, goes to the tracking station, and returns the window and the kerbal's row once a single
+    click selects it. The capsule sometimes breaks up on the launch pad as the save loads, with or without this
+    mod; the station then rebuilds its list and shows the top row, the kerbal's, lit with nothing selected, and a
+    click on a lit row does nothing (a stock defect of the station's own). The save is then loaded again."""
+    for attempt in range(4):
+        screen = start(options)
+        call("go_to_scene", scene="TRACKSTATION")
+        screen.park()
+        station_state = call("read_tracking_station")
+        rows = [r for r in station_state["rows"] if r["vessel"] == STATION_VESSEL]
+        if not rows:
+            raise RuntimeError("no row of %s in the tracking station" % STATION_VESSEL)
+        if not rows[0]["lit"] or station_state["selected"] == STATION_VESSEL:
+            return screen, rows[0]
+        log("the kerbal's row lit with nothing selected, the capsule lost: loading the save again")
+    raise RuntimeError("the kerbal's row stayed lit with nothing selected")
+
+
+def station(options, out):
+    screen, row = enter_station(options)
+    run = Run(screen, out)
+    hit = None
+    for y in range(2, round(screen.height / 12), 3):
+        found = screen.run_along_row(y, lambda x, r: screen.topmost(x, r) == STATION_SUNRISE, 0, screen.width // 2, 3)
+        if found is not None:
+            hit = (found[0] + found[1]) // 2, y
+            break
+    if hit is None:
+        raise RuntimeError("no warp-to-morning button at the top of the tracking station")
+    run.found["sunrise"] = screen.measure(hit, lambda x, y: screen.topmost(x, y) == STATION_SUNRISE)
+    run.log_found()
+    screen.park()
+    sunrise = run.found["sunrise"]
+    # The top left of the screen: the time display, its button, and the first rows of the list.
+    crop = 0, 0, sunrise.right + 6 * (sunrise.right - sunrise.left), row["top"] + 2 * row["height"]
+    run.shot("0-station", crop)
+    run.click(*sunrise.middle(), what="warp-to-morning button, no vessel selected")
+    run.shot("1-click-sunrise-nothing-selected", crop)
+    run.click(row["x"], row["y"], what="row of the kerbal")
+    run.shot("2-kerbal-selected", crop)
+    run.click(*sunrise.middle(), what="warp-to-morning button, the kerbal selected")
+    run.shot("3-click-sunrise", crop)
+    run.wait_warp_end()
+    run.shot("4-morning", None)
+
+    run.check("the kerbal selected, the click on the tracking station's warp-to-morning button warps to the morning",
+              warped(run, "warp-to-morning button, the kerbal selected", "4-morning"))
+    return run
+
+
+PROTOCOLS = {"tools": tools, "drawer": drawer, "alarm": alarm, "station": station}
 
 
 def main():
