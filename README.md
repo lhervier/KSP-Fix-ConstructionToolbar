@@ -39,18 +39,22 @@ The click meant for the Place tool then warps time to the next sunrise. The Move
 
 <img src="imgs/why-it-matters/click-place-top.jpg" width="640" alt="After the click: time warping, six arrows lit, the Move tool still selected">
 
-The alarm clock button, left of the time display, shows the next alarm in a row above it, and slides the time
-display down. The construction mode stays where it is: the time display covers the first row of the list, the
-kerbal's own inventory, and the top of the tools.
+And with the next alarm shown, it gets worse. The alarm clock button, left of the time display, shows the next
+alarm in a row above it and slides the time display down, while the construction mode stays where it is: the
+time display covers the top of the tools and the first row of the list, the kerbal's own inventory. The pointer
+brought there opens the drawer, which comes down further still.
 
 <img src="imgs/why-it-matters/next-alarm.jpg" width="640" alt="The next alarm shown: the time display over the first row of the list and the top of the tools">
 
+<img src="imgs/why-it-matters/next-alarm-drawer.jpg" width="640" alt="The next alarm shown, the pointer on the first row of the list: the drawer open over it">
+
 *KSP 1.12.5 without this mod, with [KSP Community Fixes](https://github.com/KSPModdingLibs/KSPCommunityFixes)
 1.41.1, in French, in a 1280 × 720 window, interface at 100 %, an engineer on EVA next to a small capsule on the
-launch pad, at night. Screenshots do not show the mouse cursor: it is drawn where it was. The last three are
-cropped from the top left of the screen and zoomed. First, the construction mode is opened and the Move tool
-clicked; then the pointer, coming from the middle of the screen, rests on the top of the Place tool, a quarter of
-the way down, and clicks there. The last one: the alarm clock button clicked, in construction mode.*
+launch pad, at night. Screenshots do not show the mouse cursor: it is drawn where it was. All but the first are
+cropped from the top left of the screen and zoomed. First, the next alarm hidden, the construction mode is opened
+and the Move tool clicked; then the pointer, coming from the middle of the screen, rests on the top of the Place
+tool, a quarter of the way down, and clicks there. The last two: the alarm clock button clicked, in construction
+mode, then the pointer resting on the middle of the first row of the list.*
 
 ## The culprits
 
@@ -96,11 +100,11 @@ the mod gives the stock behaviour back at once.
   and shrinks the block by as much: the block stretches over the screen's height, its pivot at its top, so its
   top comes down and its bottom stays in place. With the next alarm hidden, it puts them back.
 
-Why not stop the mask taking the pointer altogether (`raycastTarget = false`)? The drawer would no longer stay
-open on the way from the time display to the sunrise button.
+**Why not stop the mask taking the pointer altogether.** With `raycastTarget = false` on its image, the drawer
+would no longer stay open on the way from the time display to the sunrise button.
 
-Why not move the tools alone? With the next alarm shown, the time display also covers the first row of the list
-of parts, the kerbal's own inventory.
+**Why not move the tools alone.** With the next alarm shown, the time display also covers the first row of the
+list of parts, the kerbal's own inventory.
 
 ## Checked: the construction tools
 
