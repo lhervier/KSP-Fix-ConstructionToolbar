@@ -3,7 +3,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>KSPFixConstructionToolbar</AssemblyName>
     <RootNamespace>com.github.lhervier.ksp.fix.constructiontoolbar</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.0-dev</Version>
     <Description>Keeps the closed warp-to-morning drawer of the time display from taking the pointer over the EVA construction tools</Description>
     <!-- Straight into the folder that gets copied to the GameData of KSP. -->
     <OutputPath>GameData\KSPFixConstructionToolbar</OutputPath>
