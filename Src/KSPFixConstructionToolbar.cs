@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 
@@ -17,7 +18,9 @@ namespace com.github.lhervier.ksp.fix.constructiontoolbar
         private void Start()
         {
             Settings.Load();
-            Log.Info($"Version {typeof(KSPFixConstructionToolbar).Assembly.GetName().Version}, " +
+            string version = typeof(KSPFixConstructionToolbar).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            Log.Info($"Version {version}, " +
                 $"closedDrawerLetsPointerThrough {Settings.ClosedDrawerLetsPointerThrough}, " +
                 $"constructionModeBelowAlarm {Settings.ConstructionModeBelowAlarm}, log level {Log.Level}");
             Harmony harmony = new Harmony(HarmonyId);
